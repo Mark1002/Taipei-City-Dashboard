@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 
 	"TaipeiCityDashboardBE/app/models"
@@ -98,4 +100,36 @@ func UpdateIssueByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": issue})
+}
+
+type TaipeiPassResponse struct {
+	Results TaipeiPassData `json:"result"`
+}
+
+type TaipeiPassData struct {
+	Limit   int             `json:"limit"`
+	Offset  int             `json:"offset"`
+	Count   int             `json:"count"`
+	Sort    string          `json:"sort"`
+	Results json.RawMessage `json:"results"`
+}
+
+func TestGetTaipeiPass(c *gin.Context) {
+	res, err := http.Get("https://data.taipei/api/v1/dataset/a6e90031-7ec4-4089-afb5-361a4efe7202?scope=resourceAquire")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	var tp TaipeiPassResponse
+
+	json.Unmarshal(body, &tp)
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": tp.Results.Results})
 }

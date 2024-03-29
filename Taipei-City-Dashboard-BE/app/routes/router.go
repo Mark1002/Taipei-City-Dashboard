@@ -112,6 +112,7 @@ func configureIssueRoutes() {
 	{
 		issueRoutes.
 			POST("/", controllers.CreateIssue)
+		issueRoutes.GET("/test", controllers.TestGetTaipeiPass)
 	}
 	issueRoutes.Use(middleware.IsSysAdm())
 	{
